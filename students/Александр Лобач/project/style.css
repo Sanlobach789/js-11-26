@@ -15,7 +15,7 @@
     padding-bottom: 100px;
 }
 
-.catalog {
+.goods-list {
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
@@ -30,7 +30,7 @@
     padding-bottom: 25px;
 }
 
-.catalog-item {
+.goods-item {
     max-width: 350px;
     width: 100%;
 }
