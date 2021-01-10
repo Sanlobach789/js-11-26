@@ -1,96 +1,195 @@
 'use strict'
 
-class Cart {
-    constructor() {
+const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api_URL/master/responses';
 
-    }
+const sendRequest = (path) => {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-    cartSum(itemsList) {
+        xhr.timeout = 10000;
 
-    }
+        xhr.ontimeout = () => {
+            console.log('timeout!');
+        }
 
-    addToCart(){
+        xhr.onreadystatechange = () => {
+            // console.log('ready state change', xhr.readyState);
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    console.log('Error!', xhr.responseText);
+                    reject(xhr.responseText);
+                }
+            }
+        }
 
-    }
+        xhr.open('GET', `${API_URL}/${path}`);
 
-    deleteFromCart(){
+        // xhr.setRequestHeader('Content-Type', 'application/json');
 
-    }
-
-    getCartGoodsList(){
-
-    }
-
-    clearCart(){
-
-    }
-    render(){
-
-    }
-
+        xhr.send();
+    });
 }
 
+
 class GoodsItem {
-  constructor(title, price) {
-    this.title = title;
-    this.price = price;
-  }
-  render() {
-    return `<div class="goods-item"><h3>${this.title}</h3><p>${this.price}</p></div>`;
-  }
+    constructor({id_product, product_name, price}) {
+        this.id = id_product;
+        this.title = product_name;
+        this.price = price;
+    }
+
+    render() {
+        return `<div class="goods-item"><h3>${this.title}</h3><p>${this.price}</p></div>
+        <button type="button" name="add-to-basket">Add to basket</button>`;
+    }
 }
 
 class GoodsList {
-  constructor() {
-    this.goods = [];
-  }
+    constructor(basket) {
+        this.goods = [];
+        this.basket = basket;
 
-  fetchGoods() {
-    this.goods = [
-      { title: 'Shirt', price: 150 },
-      { title: 'Socks', price: 50 },
-      { title: 'Jacket', price: 350 },
-      { title: 'Shoes', price: 250 },
-    ];
-  }
+        document.querySelector('.goods-item').addEventListener('click', (event) => {
+            if (event.target.name === 'add-to-basket') {
+                const id = event.target.parentElement.dataset.id;
+                const item = this.goods.find((goodsItem) => goodsItem.id === parseInt(id));
+                if (item) {
+                    this.addToBasket(item);
+                } else {
+                    console.error(`Can't find element with id ${id}`)
+                }
+            }
+        });
+    }
 
-  totalSum(goodsList){
-    let goodsListSum = 0;
-    this.goods.forEach(good => {
-      goodsListSum += good.price
-    });
-    return goodsListSum;
-  }
+    fetchData() {
+        return new Promise((resolve, reject) => {
+            sendRequest('catalogData.json')
+                .then((data) => {
+                    this.goods = data;
+                    resolve();
+                });
+        });
+    }
 
-  render() {
-    let listHtml = '';
-    this.goods.forEach(good => {
-      const goodItem = new GoodsItem(good.title, good.price);
-      listHtml += goodItem.render();
-    });
-    document.querySelector('.goods-list').innerHTML = listHtml;
-  }
+    newFetchData(callback) {
+        fetch(`${API_URL}/catalogData.json`)
+            .then((response) => {
+                console.log(response);
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+                this.goods = data;
+                callback();
+            });
+    }
+
+    addToBasket(item) {
+        this.basket.addItem(item);
+    }
+
+    getTotalPrice() {
+        return this.goods.reduce((acc, curVal) => {
+            return acc + curVal.price;
+        }, 0);
+    }
+
+    render() {
+        const goodsList = this.goods.map(item => {
+            const goodsItem = new GoodsItem(item);
+            return goodsItem.render();
+        });
+        document.querySelector('.goods-list').innerHTML = goodsList.join('');
+    }
 }
 
-const list = new GoodsList();
-list.fetchGoods();
-list.render();
+class Basket {
+    constructor() {
+        this.basketGoods = [];
+        this.amount = 0;
+        this.countGoods = 0;
+    }
 
-// const renderGoodsItem = (title = '...', price = 'Нет в наличие') => {
-//     return `<div class="catalog-column">
-//                 <div class="catalog-item">
-//
-//                     <h3 class="item-heading">${title}</h3>
-//                     <p class="item-description">Lorem ipsum dolor sit amet.</p>
-//                     <p class="item-price">${price} &#8381;</p>
-//                     <button type="button" class="btn btn-primary item-to-cart-button">Добавить в корзину</button>
-//                 </div>
-//             </div>`;
-// };
-//
-// const renderGoodsList = (list) => {
-//     let goodsList = list.map(item => renderGoodsItem(item.title, item.price));
-//     document.querySelector('.catalog').innerHTML = goodsList.join('');
-// }
-//
-// renderGoodsList(goods);
+    addItem(item) {
+        this.basketGoods.push(item);
+        console.log(this.basketGoods);
+    }
+
+    removeItem(id) {
+        this.basketGoods = this.basketGoods.filter((goodsItem) => goodsItem.id_product !== parseInt(id));
+        console.log(this.basketGoods);
+    }
+
+    changeQuantity() {
+
+    }
+
+    clear() {
+
+    }
+
+    fetchData() {
+        return new Promise((resolve, reject) => {
+            sendRequest('getBasket.json')
+                .then((data) => {
+                    this.basketGoods = data.contents;
+                    this.amount = data.amount;
+                    this.countGoods = data.countGoods;
+                    console.log(this);
+                    resolve();
+                });
+        });
+    }
+
+    applyPromoCode() {
+
+    }
+
+    getDeliveryPrice() {
+
+    }
+
+    createOrder() {
+
+    }
+
+    getTotalPrice() {
+
+    }
+
+    render() {
+
+    }
+}
+
+class BasketItem {
+    constructor({title}) {
+        this.title = title;
+    }
+
+    changeQuantity() {
+
+    }
+
+    removeItem() {
+    }
+
+    changeType() {
+    }
+
+    render() {
+
+    }
+}
+
+const basket = new Basket();
+basket.fetchData();
+const goodsList = new GoodsList(basket);
+goodsList.fetchData()
+    .then(() => {
+        goodsList.render();
+        goodsList.getTotalPrice();
+    });
