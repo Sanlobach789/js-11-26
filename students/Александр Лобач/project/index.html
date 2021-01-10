@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="style.css">
     <title>JS shop</title>
     <script src="script.js" defer></script>
+    <script src="validation-script.js" defer></script>
 </head>
 <body>
 <div class="head-container">
@@ -32,8 +33,34 @@
                 </div>
             </li>
         </ul>
-        <button type="button" class="btn btn-lg btn-danger" data-toggle="popover" title="В вашей корзине пусто">Корзина
+        <!-- Button Basket modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#staticBackdrop" id="basketButton">
+            Корзина
         </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group" id="userBasketItems">
+
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary">Оформить заказ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </nav>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
 
@@ -59,12 +86,63 @@
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
         </form>
     </nav>
+    <div class="contact-us">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"
+                id="contactUsButton">
+            Обратная связь
+        </button>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Свяжитесь с нами</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="nameInput">Ваше имя</label>
+                            <input type="text" class="form-control" id="nameInput"
+                                   placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailInput">Email</label>
+                            <input type="email" class="form-control" id="emailInput"
+                                   placeholder="name@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="telInput">Номер телефона</label>
+                            <input type="tel" class="form-control" id="telInput"
+                                   placeholder="+79000000000">
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Текст сообщения</span>
+                            </div>
+                            <textarea class="form-control" aria-label="With textarea"></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeContactData">
+                                Закрыть
+                            </button>
+                            <button type="button" class="btn btn-primary" id="sendContactData">Отправить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="body-container">
 
     <div class="goods-list">
 
     </div>
+
+
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->

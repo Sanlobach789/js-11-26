@@ -1,6 +1,6 @@
 'use strict'
 
-const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api_URL/master/responses';
+const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
 const sendRequest = (path) => {
     return new Promise((resolve, reject) => {
@@ -41,8 +41,9 @@ class GoodsItem {
     }
 
     render() {
-        return `<div class="goods-item"><h3>${this.title}</h3><p>${this.price}</p></div>
-        <button type="button" name="add-to-basket">Add to basket</button>`;
+        return `<div class="goods-item" data-id="${this.id}"><h3>${this.title}</h3><p>${this.price}</p>
+                <button type="button" name="add-to-basket">В корзину</button></div>
+        `;
     }
 }
 
@@ -51,10 +52,10 @@ class GoodsList {
         this.goods = [];
         this.basket = basket;
 
-        document.querySelector('.goods-item').addEventListener('click', (event) => {
+        document.querySelector('.goods-list').addEventListener('click', (event) => {
             if (event.target.name === 'add-to-basket') {
                 const id = event.target.parentElement.dataset.id;
-                const item = this.goods.find((goodsItem) => goodsItem.id === parseInt(id));
+                const item = this.goods.find((goodsItem) => goodsItem.id_product === parseInt(id));
                 if (item) {
                     this.addToBasket(item);
                 } else {
@@ -69,6 +70,7 @@ class GoodsList {
             sendRequest('catalogData.json')
                 .then((data) => {
                     this.goods = data;
+                    console.log(this.goods);
                     resolve();
                 });
         });
@@ -161,13 +163,27 @@ class Basket {
     }
 
     render() {
-
+        document.getElementById('basketButton').addEventListener('click', (event) => {
+            let basketListElement = document.getElementById('userBasketItems');
+            const goodsList = this.basketGoods.map(item => {
+                const basketItem = new BasketItem(item);
+                return basketItem.render();
+            });
+            basketListElement.innerHTML = goodsList.join('')
+        })
     }
 }
 
 class BasketItem {
-    constructor({title}) {
-        this.title = title;
+
+    constructor(item) {
+        this.id = item.id_product;
+        this.title = item.product_name;
+        this.price = item.price;
+    }
+
+    render() {
+        return '<li class="list-group-item"></li>';
     }
 
     changeQuantity() {
@@ -180,16 +196,17 @@ class BasketItem {
     changeType() {
     }
 
-    render() {
 
-    }
 }
 
 const basket = new Basket();
 basket.fetchData();
+basket.render();
 const goodsList = new GoodsList(basket);
 goodsList.fetchData()
     .then(() => {
         goodsList.render();
         goodsList.getTotalPrice();
     });
+
+
