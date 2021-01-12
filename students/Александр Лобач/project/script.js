@@ -1,27 +1,110 @@
-'use strict'
+const API_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
 
-const goods = [
-    {title: 'Shirt', price: 150},
-    {title: 'Socks', price: 50},
-    {title: 'Jacket', price: 350},
-    {title: 'Shoes', price: 250},
-];
+const sendRequest = (path) => {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-const renderGoodsItem = (title = '...', price = 'Нет в наличие') => {
-    return `<div class="catalog-column">
-                <div class="catalog-item">
-                
-                    <h3 class="item-heading">${title}</h3>
-                    <p class="item-description">Lorem ipsum dolor sit amet.</p>
-                    <p class="item-price">${price} &#8381;</p>
-                    <button type="button" class="btn btn-primary item-to-cart-button">Добавить в корзину</button>
-                </div>
-            </div>`;
-};
+        xhr.timeout = 10000;
 
-const renderGoodsList = (list) => {
-    let goodsList = list.map(item => renderGoodsItem(item.title, item.price));
-    document.querySelector('.catalog').innerHTML = goodsList.join('');
+        xhr.ontimeout = () => {
+            console.log('timeout!');
+        }
+
+        xhr.onreadystatechange = () => {
+            // console.log('ready state change', xhr.readyState);
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    console.log('Error!', xhr.responseText);
+                    reject(xhr.responseText);
+                }
+            }
+        }
+
+        xhr.open('GET', `${API_URL}/${path}`);
+
+        // xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.send();
+    });
 }
 
-renderGoodsList(goods);
+new Vue({
+    el: '#app',
+    data: {
+        goods: [],
+        basketGoods: [],
+        searchValue: '',
+        isVisible: false,
+    },
+    mounted() {
+        this.fetchData();
+        this.fetchBasketData();
+    },
+    methods: {
+        fetchData() {
+            return new Promise((resolve, reject) => {
+                sendRequest('catalogData.json')
+                    .then((data) => {
+                        this.goods = data;
+                        resolve();
+                    });
+            });
+        },
+        fetchBasketData() {
+            return new Promise((resolve, reject) => {
+                sendRequest('getBasket.json')
+                    .then((data) => {
+                        this.basketGoods = data.contents;
+                        // this.amount = data.amount;
+                        // this.countGoods = data.countGoods;
+                        resolve();
+                    });
+            });
+        },
+        addToBasket(item) {
+            const index = this.basketGoods.findIndex((basketItem) => basketItem.id_product === item.id_product);
+            if (index > -1) {
+                this.basketGoods[index].quantity += 1;
+                // this.basketGoods[index] = { ...this.basketGoods[index], quantity: this.basketGoods[index].quantity + 1 };
+            } else {
+                this.basketGoods.push(item);
+            }
+            console.log(this.basketGoods);
+        },
+        removeItem(id) {
+            this.basketGoods = this.basketGoods.filter((goodsItem) => goodsItem.id_product !== parseInt(id));
+            console.log(this.basketGoods);
+        },
+
+        openBasket() {
+            this.isVisible = true
+            console.log('Корзина открыта')
+
+        },
+        closeBasket() {
+            this.isVisible = false
+            console.log('Корзина закрыта')
+        }
+    },
+    computed: {
+        filteredGoods() {
+            const regexp = new RegExp(this.searchValue.trim(), 'i');
+            return this.goods.filter((goodsItem) => regexp.test(goodsItem.product_name));
+        },
+        totalPrice() {
+            return this.goods.reduce((acc, curVal) => {
+                return acc + curVal.price;
+            }, 0);
+        },
+        // someComputedProp: {
+        //   get() {
+        //     return this.name.toUpperCaes();
+        //   },
+        //   set(value) {
+        //     this.name = value.split('/');
+        //   }
+        // }
+    },
+})
