@@ -30,6 +30,71 @@ const sendRequest = (path) => {
     });
 }
 
+Vue.component('v-basket', {
+    props: ['basketGoods']
+    template: `
+        <!-- Basket Modal -->
+            <div class="modal fade" id="staticBackdrop" v-if="isVisible===true" data-backdrop="static" data-keyboard="false" tabindex="-1"
+                 aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">Корзина</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="list-group" id="userBasketItems">
+                                ...
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeBasket()">Закрыть</button>
+                            <button type="button" class="btn btn-primary">Оформить заказ</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+    `,
+});
+
+Vue.component('v-basketGood', {
+    props: ['basketItem']
+    template: `
+        <li class="list-group-item">{{basketItem.product_name}} Цена:{{basketItem.price}} Количество: {{basketItem.quantity}}</li>
+    `,
+});
+
+Vue.component('v-goods', {
+    props: ['goodsList']
+    template: `   
+        <div class="goods-list">
+            ...
+        </div>
+    `,
+    methods: {
+
+    }
+});
+
+Vue.component('v-good', {
+    props: ['item']
+    template: `   
+        <div class="goods-item"><h3>{{item.product_name}}</h3>
+                <p>{{item.price}}</p>
+                <button type="button" :click="addToBasket">В корзину</button>
+            </div>
+    `,
+
+    methods: {
+        addToBasket() {
+            this.$emmit('addToBasket', this.item)
+        }
+    }
+});
+
 new Vue({
     el: '#app',
     data: {
