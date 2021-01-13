@@ -31,11 +31,14 @@ const sendRequest = (path) => {
 }
 
 Vue.component('v-basket', {
-    props: ['basketGoods']
+    props: ['basketItems', 'isVisibleFlag'],
     template: `
-        <!-- Basket Modal -->
-            <div class="modal fade" id="staticBackdrop" v-if="isVisible===true" data-backdrop="static" data-keyboard="false" tabindex="-1"
-                 aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="Basket-component">
+            <button type="button" class="btn btn-primary"
+                    id="basketButton" @click="changeBasketVisibility">
+                Корзина
+            </button>
+            <div class="basket-modal" v-if="isVisibleFlag===true" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -46,41 +49,60 @@ Vue.component('v-basket', {
                         </div>
                         <div class="modal-body">
                             <ul class="list-group" id="userBasketItems">
-                                ...
+                                <v-basket-good 
+                                v-for="item in basketItems"
+                                :basketItem=item
+                                :key="item.product_name"
+                                ></v-basket-good>
                             </ul>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeBasket()">Закрыть</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="changeBasketVisibility">Закрыть</button>
                             <button type="button" class="btn btn-primary">Оформить заказ</button>
                         </div>
                     </div>
-
                 </div>
             </div>
+          </div>
     `,
+    methods: {
+        changeBasketVisibility() {
+            this.$emit('change-is-cart-visible')
+        },
+
+    }
 });
 
-Vue.component('v-basketGood', {
-    props: ['basketItem']
+Vue.component('v-basket-good', {
+    props: ['basketItem'],
     template: `
         <li class="list-group-item">{{basketItem.product_name}} Цена:{{basketItem.price}} Количество: {{basketItem.quantity}}</li>
     `,
 });
 
 Vue.component('v-goods', {
-    props: ['goodsList']
+    props: ['goodsList'],
     template: `   
         <div class="goods-list">
-            ...
+            <v-good
+            v-for="good in goodsList"
+            :item=good
+            :key=good.product_name
+            @addToBasket="handleAddToBasket">
+            <div v-if="!goodsList.length" class="goods-empty"
+                Нет данных
+            </v-good>
         </div>
     `,
     methods: {
-
+        handleAddToBasket(data) {
+            this.$emit('add', data);
+        },
     }
 });
 
 Vue.component('v-good', {
-    props: ['item']
+    props: ['item'],
     template: `   
         <div class="goods-item"><h3>{{item.product_name}}</h3>
                 <p>{{item.price}}</p>
@@ -142,16 +164,6 @@ new Vue({
             this.basketGoods = this.basketGoods.filter((goodsItem) => goodsItem.id_product !== parseInt(id));
             console.log(this.basketGoods);
         },
-
-        openBasket() {
-            this.isVisible = true
-            console.log('Корзина открыта')
-
-        },
-        closeBasket() {
-            this.isVisible = false
-            console.log('Корзина закрыта')
-        }
     },
     computed: {
         filteredGoods() {

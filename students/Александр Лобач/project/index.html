@@ -37,13 +37,12 @@
                     </div>
                 </li>
             </ul>
-            <!-- Button Basket modal -->
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#staticBackdrop"
-                    id="basketButton" @click="openBasket">
-                Корзина
-            </button>
+            <div class="basket" >
 
+            <v-basket :basket-items="basketGoods" :is-visible-flag="isVisible" @change-is-cart-visible="isVisible=!isVisible">
 
+            </v-basket>
+            </div>
         </nav>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
 
@@ -123,9 +122,10 @@
         </div>
     </div>
     <div class="body-container">
-        <v-goods>
-
-        </v-goods>
+        <v-goods
+            :goods-list="goods"
+            @add="addToBasket"
+        ></v-goods>
     </div>
 </div>
         <!-- Optional JavaScript; choose one of the two! -->
